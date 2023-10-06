@@ -4,4 +4,4 @@ dist/
 *.spec
 
 __pycache__/
-buildapp
+buildapp.bat
