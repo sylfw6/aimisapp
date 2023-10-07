@@ -64,7 +64,7 @@ class Match(tk.Button):
         button.bind("<Enter>", lambda event: Match.on_enter(event, button, border))
         button.bind("<Leave>", lambda event: Match.on_leave(event, button, border))
 
-def create_match(root, old=None):
+def create_match(root, old=None, btntxt=None, ovlst=None, statslst=None):
     #if we click the match history button dont need to take screenshots
     #if old is none that means we are plugging in an old window to destroy - means we need to raise the flag to scan for stuff
     #else we dont need to look for any screenshots to take just display whatever is in the history rn
@@ -87,13 +87,14 @@ def create_match(root, old=None):
     container = ScrolledFrame(parent, autohide=False)
     container.pack(fill=BOTH, expand=YES, padx=10, pady=10)
     
-    btntxt, ovlst = get_overview(flag)
-    statslst = get_stats(flag)
+    if btntxt == None:
+        btntxt, ovlst = get_overview(flag)
+        statslst = get_stats(flag)
 
     for i in range(len(btntxt)):
         button = Match(time=btntxt[i][0], map=btntxt[i][1], score=btntxt[i][2], rank=btntxt[i][3], lp=btntxt[i][4], im1=ovlst[i], im2=statslst[i])
         button.createButton(container, i)
-
+    print("done creating buttons")
     return parent
 
 def open_images(self):

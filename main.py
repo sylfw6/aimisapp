@@ -1,6 +1,6 @@
 from shared_module import get_script_directory
 from profileRequestCorestrike import is_target_image_present, call_corestrike, template_path
-from matchHistory import overview_template
+from matchHistory import overview_template, stats_template, get_overview, get_stats
 from populateMatchHistory import create_match
 from itertools import count, cycle
 from PIL import ImageTk
@@ -94,6 +94,10 @@ def round_down_to_nearest_100(num):
     else:
         return res
     
+def raise_above_all(window):
+    window.attributes('-topmost', 1)
+    window.attributes('-topmost', 0)
+
 #start button prompt
 #scanning/loading screen
 #info screen as a separate window
@@ -124,30 +128,50 @@ def title_screen():
 def load_screen_endgame():
     loading = tk.Toplevel(root)
     loading.title("scanning for end screen")
-    waiting = ttk.Label(loading, text="scanning for end screen", font=("Arial Bold", 50))
+    waiting = ttk.Label(loading, text="scanning for end screen", font=("Arial Bold", 25))
     waiting.pack()
     load_gif = ImageLabel(loading)
     load_gif.pack()
     load_gif.load(noted)
-    backend_thread = threading.Thread(target=scan_for_overview, args=(root, loading,waiting, load_gif))
+    backend_thread = threading.Thread(target=scan_for_overview, args=(root, loading, waiting, load_gif))
     backend_thread.daemon = True
     backend_thread.start()
     loading.mainloop()
     
 def scan_for_overview(root, window, text, gif):
-    if is_target_image_present(overview_template, .3):
-        time.sleep(1)
-        text.config(text="End screen found - Ai.Mi is working")
+    if is_target_image_present(overview_template, .4):
+        root.iconify()
+        window.iconify()
+        btn, ov = get_overview(True)
+        window.deiconify()
+        window.wm_attributes("-topmost", True)
+        text.config(text="Overview found - Searching for stats")
         gif.load(gamercat)
-        time.sleep(1)
-        match_history(root, window)
+        scan_for_stats(root, window, text, gif, btn, ov)
     else:
-        print("Searching for end screen")
+        print("Searching for overview screen")
         window.after(1000, scan_for_overview(root, window, text, gif))
 
+def scan_for_stats(root, window, text, gif, btn, ov):
+    if is_target_image_present(stats_template, .3):
+        root.iconify()
+        window.iconify()
+        time.sleep(1)
+        sts = get_stats(True)
+        window.deiconify()
+        window.wm_attributes("-topmost", True)
+        text.config(text="Creating match history - Ai.Mi is working")
+        root.deiconify()
+        gif.load(gamercat)
+        match_history(root, window, btn, ov, sts)
+    else:
+        print("Searching for stats screen")
+        window.after(1000, scan_for_stats(root, window, text, gif, btn, ov))
+
+
 #this gets done in another file its here for the sake of consistency
-def match_history(root, old_window=None):
-    create_match(root, old_window)
+def match_history(root, old_window=None, btn=None, ov=None, sts=None):
+    create_match(root, old_window, btn, ov, sts)
 
 def load_screen():
     loading = ttk.Toplevel(root)
@@ -164,10 +188,10 @@ def load_screen():
 
 def scan_for_loading(window, text, gif):
     if is_target_image_present(template_path, .8):
-        time.sleep(1)
+        #time.sleep(1)
         text.config(text="Players found - Ai.Mi is working")
         gif.load(gamercat)
-        time.sleep(1)
+        #time.sleep(1)
         match_found(window)
     else:
         print("Searching for loading screen")

@@ -101,7 +101,7 @@ def win_or_loss(img, template):
     w, h = template.shape[::-1]
 
     res = cv.matchTemplate(src,template,cv.TM_CCOEFF_NORMED)
-    threshold = 0.5
+    threshold = 0.4
     #did we find what we were looking for?
     loc = np.where( res >= threshold)
     #if we did return image
@@ -204,6 +204,7 @@ def get_overview(flag=None):
 
         #need overview_info for button
         #we already have the screenshot of the current games info
+        print("overview complete")
     return overview_stack, overview_photo_stack
     
 
@@ -233,6 +234,7 @@ def get_stats(flag=None):
                 file.write(json.dumps(game, separators=(',', ':')) + '\n')
 
         #returning screenshot of stats screen to attach to a button press
+        print("stats complete")
     return stats_stack
 
 if __name__=="__main__":

@@ -138,6 +138,7 @@ async def get_corestrike_data(session, name):
         return await response.json()
     
 #calls corestrike for all players in the match asynchronously
+#fail condition if the profile doesnt exist
 async def call_corestrike():
     names = get_info()
     user = {}
