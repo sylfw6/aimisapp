@@ -60,6 +60,7 @@ class Match(tk.Button):
         border = tk.Frame(frame, highlightbackground=s.colors.get("bg"),highlightthickness=2, width=button.winfo_width()+10,height=button.winfo_height()+10)
         border.grid(row=x, column=0, pady=5)
         button.lift()
+        frame.update()
 
         button.bind("<Enter>", lambda event: Match.on_enter(event, button, border))
         button.bind("<Leave>", lambda event: Match.on_leave(event, button, border))
@@ -73,29 +74,32 @@ def create_match(root, old=None, btntxt=None, ovlst=None, statslst=None):
         flag = True
     else:
         flag = False
-    
-    parent = ttk.Toplevel(root)
-    parent.geometry("1280x720")
-    parent.title("Match History")
-    #add a label with some text to say match history
-    text = ttk.Label(parent, text="Match History", font=("Arial Bold", 50))
-    text.pack()
-    #data has most recent match overview in it
-    #parent contains the window w/ text packed at the top
-    #needs frame below that holds buttons and frames packed in 
-    
-    container = ScrolledFrame(parent, autohide=False)
-    container.pack(fill=BOTH, expand=YES, padx=10, pady=10)
-    
-    if btntxt == None:
-        btntxt, ovlst = get_overview(flag)
-        statslst = get_stats(flag)
+        parent = ttk.Toplevel(root)
+        parent.geometry("1280x720")
+        parent.title("Match History")
+        #add a label with some text to say match history
+        text = ttk.Label(parent, text="Match History", font=("Arial Bold", 50))
+        text.pack()
+        parent.update()
+        #data has most recent match overview in it
+        #parent contains the window w/ text packed at the top
+        #needs frame below that holds buttons and frames packed in 
+        
+        container = ScrolledFrame(parent, autohide=False)
+        container.pack(fill=BOTH, expand=YES, padx=10, pady=10)
+        parent.update()
 
-    for i in range(len(btntxt)):
-        button = Match(time=btntxt[i][0], map=btntxt[i][1], score=btntxt[i][2], rank=btntxt[i][3], lp=btntxt[i][4], im1=ovlst[i], im2=statslst[i])
-        button.createButton(container, i)
-    print("done creating buttons")
-    return parent
+        if btntxt == None:
+            btntxt, ovlst = get_overview(flag)
+            statslst = get_stats(flag)
+
+        for i in range(len(btntxt)):
+            button = Match(time=btntxt[i][0], map=btntxt[i][1], score=btntxt[i][2], rank=btntxt[i][3], lp=btntxt[i][4], im1=ovlst[i], im2=statslst[i])
+            parent.after(100, button.createButton(container, i))
+
+        print("done creating buttons")
+        parent.update()
+        parent.update_idletasks()
 
 def open_images(self):
     window = ttk.Toplevel()

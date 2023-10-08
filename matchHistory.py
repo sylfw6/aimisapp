@@ -94,7 +94,7 @@ ranks = [
     "Pro League"
 ]
 
-
+#crops out victory or enemy victory to make reading the time, map, and score easier
 def win_or_loss(img, template):
     src = img
     template = cv.imread(template,0)
@@ -154,31 +154,40 @@ def get_overview(flag=None):
         left_half = img[y:h, x:int((float(img.shape[1]) * .255)//1)]
         right_half = img[y:h, int((float(img.shape[1]) * .83)//1):x+w]
 
+        #need to train with different font this is too inconsistent
         match_info = process_image(left_half)
         rank_info = process_image(right_half)
 
         match_info = win_or_loss(match_info, ENEMY_template)
 
-        dirty_text = img_to_str(match_info)
-        dirty_rank = img_to_str(rank_info)
-        
-        #this may not always work
-        #clean up dirty_text to acquire match duration, map name, score
-        temp = dirty_text[0]
-        duration = temp[:7]
-        map_name = temp[7:]
-        score = dirty_text[1]
+        time_and_map = match_info[0:int((float(match_info.shape[0]) * .20)//1),0:match_info.shape[1]]
+        score_img = match_info[int((float(match_info.shape[0]) * .4)//1):match_info.shape[0],0:match_info.shape[1]]
 
-        map_name = [x for x in map_name if x.isalpha() or x == "'" or x.isspace()]
-        score = [x for x in score if x.isdigit() or x == "-"]
-        map_name = ''.join(map_name).strip()
-        score = ''.join(score).strip()
-
+        dirty_time = img_to_str(time_and_map)
+        dirty_score = img_to_str(score_img)
+        duration, map_name = dirty_time[0].split("-")
+        score = ' '.join([str(elem) for elem in dirty_score])        
         map_info = [duration, map_name, score]
-
+        
+        #should never need to clean up score as it can read three characters black text surrounded by white 
+        #score
+        """try:
+            score = dirty_text[1]
+            score = [x for x in score if x.isdigit() or x == "-"]
+            score = ''.join(score).strip()
+        except:
+            #fix this later
+            #print("shit cant find the score")
+            score = "0-0
+        map_name = [x for x in map_name if x.isalpha() or x == "'" or x.isspace()]
+        map_name = ''.join(map_name).strip()
+        #score processing
+        """
+        
+        dirty_rank = img_to_str(rank_info)
         #this may not always work
         #clean up dirty_rank to get rank name, lp total
-
+        
         clean_rank = []
 
         for entry in dirty_rank:
@@ -238,5 +247,5 @@ def get_stats(flag=None):
     return stats_stack
 
 if __name__=="__main__":
-    get_overview()
-    get_stats()
+    get_overview(True)
+    get_stats(True)

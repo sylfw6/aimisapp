@@ -134,15 +134,15 @@ def load_screen_endgame():
     load_gif.pack()
     load_gif.load(noted)
     backend_thread = threading.Thread(target=scan_for_overview, args=(root, loading, waiting, load_gif))
-    backend_thread.daemon = True
     backend_thread.start()
-    loading.mainloop()
     
 def scan_for_overview(root, window, text, gif):
-    if is_target_image_present(overview_template, .4):
+    if is_target_image_present(overview_template, .3):
         root.iconify()
         window.iconify()
+        window.after(1000)
         btn, ov = get_overview(True)
+        window.update()
         window.deiconify()
         window.wm_attributes("-topmost", True)
         text.config(text="Overview found - Searching for stats")
@@ -151,13 +151,16 @@ def scan_for_overview(root, window, text, gif):
     else:
         print("Searching for overview screen")
         window.after(1000, scan_for_overview(root, window, text, gif))
+        root.update()
 
 def scan_for_stats(root, window, text, gif, btn, ov):
     if is_target_image_present(stats_template, .3):
         root.iconify()
         window.iconify()
-        time.sleep(1)
+        window.after(1000)
         sts = get_stats(True)
+        window.update()
+        print("all stuff found")
         window.deiconify()
         window.wm_attributes("-topmost", True)
         text.config(text="Creating match history - Ai.Mi is working")
@@ -167,11 +170,15 @@ def scan_for_stats(root, window, text, gif, btn, ov):
     else:
         print("Searching for stats screen")
         window.after(1000, scan_for_stats(root, window, text, gif, btn, ov))
-
+        root.update()
 
 #this gets done in another file its here for the sake of consistency
 def match_history(root, old_window=None, btn=None, ov=None, sts=None):
+    print("populating match window passively")
     create_match(root, old_window, btn, ov, sts)
+    root.update_idletasks()
+    root.update()
+    print("done")
 
 def load_screen():
     loading = ttk.Toplevel(root)
@@ -215,12 +222,16 @@ def info_screen(user, names, old_window):
     p6name = ttk.Label(match_stats, text=names[5], font=("Arial", 25))
     title = ttk.Label(match_stats, text="holy moly its omega strikers", font=("Arial Bold", 50))
 
+    match_stats.update()
+
     p1winrate = createMeter(user[names[0]], match_stats, names[0])
     p2winrate = createMeter(user[names[1]], match_stats, names[1])
     p3winrate = createMeter(user[names[2]], match_stats, names[2])
     p4winrate = createMeter(user[names[3]], match_stats, names[3])
     p5winrate = createMeter(user[names[4]], match_stats, names[4])
     p6winrate = createMeter(user[names[5]], match_stats, names[5])
+
+    match_stats.update()
 
     p1wins = ttk.Label(match_stats, text="Wins: " + str(user[names[0]]["wins"]), font=("Arial", 25))
     p2wins = ttk.Label(match_stats, text="Wins: " + str(user[names[1]]["wins"]), font=("Arial", 25))
@@ -229,12 +240,16 @@ def info_screen(user, names, old_window):
     p5wins = ttk.Label(match_stats, text="Wins: " + str(user[names[4]]["wins"]), font=("Arial", 25))
     p6wins = ttk.Label(match_stats, text="Wins: " + str(user[names[5]]["wins"]), font=("Arial", 25))
 
+    match_stats.update()
+
     p1games = ttk.Label(match_stats, text="Games: " + str(user[names[0]]["wins"] + user[names[0]]["losses"]), font=("Arial", 25))
     p2games = ttk.Label(match_stats, text="Games: " + str(user[names[1]]["wins"] + user[names[1]]["losses"]), font=("Arial", 25))
     p3games = ttk.Label(match_stats, text="Games: " + str(user[names[2]]["wins"] + user[names[2]]["losses"]), font=("Arial", 25))
     p4games = ttk.Label(match_stats, text="Games: " + str(user[names[3]]["wins"] + user[names[3]]["losses"]), font=("Arial", 25))
     p5games = ttk.Label(match_stats, text="Games: " + str(user[names[4]]["wins"] + user[names[4]]["losses"]), font=("Arial", 25))
     p6games = ttk.Label(match_stats, text="Games: " + str(user[names[5]]["wins"] + user[names[5]]["losses"]), font=("Arial", 25))
+
+    match_stats.update()
 
     p1rank = ttk.Label(match_stats, text="Rank: " + str(ranks[round_down_to_nearest_100(user[names[0]]["rating"])]), font=("Arial", 25))
     p2rank = ttk.Label(match_stats, text="Rank: " + str(ranks[round_down_to_nearest_100(user[names[1]]["rating"])]), font=("Arial", 25))
@@ -243,12 +258,16 @@ def info_screen(user, names, old_window):
     p5rank = ttk.Label(match_stats, text="Rank: " + str(ranks[round_down_to_nearest_100(user[names[4]]["rating"])]), font=("Arial", 25))
     p6rank = ttk.Label(match_stats, text="Rank: " + str(ranks[round_down_to_nearest_100(user[names[5]]["rating"])]), font=("Arial", 25))
 
+    match_stats.update()
+
     p1rating = ttk.Label(match_stats, text="Rating: " + str(user[names[0]]["rating"]), font=("Arial", 25))
     p2rating = ttk.Label(match_stats, text="Rating: " + str(user[names[1]]["rating"]), font=("Arial", 25))
     p3rating = ttk.Label(match_stats, text="Rating: " + str(user[names[2]]["rating"]), font=("Arial", 25))
     p4rating = ttk.Label(match_stats, text="Rating: " + str(user[names[3]]["rating"]), font=("Arial", 25))
     p5rating = ttk.Label(match_stats, text="Rating: " + str(user[names[4]]["rating"]), font=("Arial", 25))
     p6rating = ttk.Label(match_stats, text="Rating: " + str(user[names[5]]["rating"]), font=("Arial", 25))
+
+    match_stats.update()
 
     title.grid(row=1,column=2,padx=10,pady=10,columnspan=4,sticky=tk.W+tk.E)
     p1name.grid(row=2,column=1,padx=10,pady=10)
@@ -257,36 +276,47 @@ def info_screen(user, names, old_window):
     p4name.grid(row=2,column=4,padx=10,pady=10)
     p5name.grid(row=2,column=5,padx=10,pady=10)
     p6name.grid(row=2,column=6,padx=10,pady=10)
+    match_stats.update()
+
     p1winrate.grid(row=3,column=1,padx=10,pady=5)
     p2winrate.grid(row=3,column=2,padx=10,pady=5)
     p3winrate.grid(row=3,column=3,padx=10,pady=5)
     p4winrate.grid(row=3,column=4,padx=10,pady=5)
     p5winrate.grid(row=3,column=5,padx=10,pady=5)
     p6winrate.grid(row=3,column=6,padx=10,pady=5)
+    match_stats.update()
+
     p1wins.grid(row=4,column=1,padx=10,pady=5)
     p2wins.grid(row=4,column=2,padx=10,pady=5)
     p3wins.grid(row=4,column=3,padx=10,pady=5)
     p4wins.grid(row=4,column=4,padx=10,pady=5)
     p5wins.grid(row=4,column=5,padx=10,pady=5)
     p6wins.grid(row=4,column=6,padx=10,pady=5)
+    match_stats.update()
+
     p1games.grid(row=5,column=1,padx=10,pady=5)
     p2games.grid(row=5,column=2,padx=10,pady=5)
     p3games.grid(row=5,column=3,padx=10,pady=5)
     p4games.grid(row=5,column=4,padx=10,pady=5)
     p5games.grid(row=5,column=5,padx=10,pady=5)
     p6games.grid(row=5,column=6,padx=10,pady=5)
+    match_stats.update()
+
     p1rank.grid(row=6,column=1,padx=10,pady=5)
     p2rank.grid(row=6,column=2,padx=10,pady=5)
     p3rank.grid(row=6,column=3,padx=10,pady=5)
     p4rank.grid(row=6,column=4,padx=10,pady=5)
     p5rank.grid(row=6,column=5,padx=10,pady=5)
     p6rank.grid(row=6,column=6,padx=10,pady=5)
+    match_stats.update()
+
     p1rating.grid(row=7,column=1,padx=10,pady=5)
     p2rating.grid(row=7,column=2,padx=10,pady=5)
     p3rating.grid(row=7,column=3,padx=10,pady=5)
     p4rating.grid(row=7,column=4,padx=10,pady=5)
     p5rating.grid(row=7,column=5,padx=10,pady=5)
     p6rating.grid(row=7,column=6,padx=10,pady=5)
+    match_stats.update()
 
 if __name__=="__main__":
     root = ttk.Window(title="aimis app", iconphoto=os.path.join(script_dir, "assets/orb.png"))
