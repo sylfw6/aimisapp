@@ -9,10 +9,8 @@ import math
 import os
 import PIL.Image
 PIL.Image.CUBIC = PIL.Image.BICUBIC
-import sys
 import tkinter as tk
 import ttkbootstrap as ttk
-import time
 import threading
 from ttkbootstrap.constants import *
 #key: username

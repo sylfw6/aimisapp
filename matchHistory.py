@@ -12,7 +12,6 @@ import random
 import numpy as np
 import shutil
 import string
-import sys
 import time
 
 #take a screenshot when the game ends on the overview screen
@@ -101,7 +100,7 @@ def win_or_loss(img, template):
     w, h = template.shape[::-1]
 
     res = cv.matchTemplate(src,template,cv.TM_CCOEFF_NORMED)
-    threshold = 0.4
+    threshold = 0.3
     #did we find what we were looking for?
     loc = np.where( res >= threshold)
     #if we did return image
@@ -165,6 +164,7 @@ def get_overview(flag=None):
 
         dirty_time = img_to_str(time_and_map)
         dirty_score = img_to_str(score_img)
+        print(dirty_time, dirty_score)
         duration, map_name = dirty_time[0].split("-")
         score = ' '.join([str(elem) for elem in dirty_score])        
         map_info = [duration, map_name, score]
