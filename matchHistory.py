@@ -119,9 +119,9 @@ def process_image(img):
     final_img = cv.medianBlur(final_img, 5)
     return final_img
 
-def img_to_str(img):
+def img_to_str(img, psm=None):
     pytesseract.tesseract_cmd = path_to_tesseract
-    text = pytesseract.image_to_string(img)
+    text = pytesseract.image_to_string(img, config=psm)
     #filter out empty list entries
     dirty_text = list(filter(lambda x: len(x) > 0, text.split('\n')))
 
@@ -151,48 +151,39 @@ def get_overview(flag=None):
         h=int((float(img.shape[0]) * .5)//1)
         w=int((float(img.shape[1]) * .91)//1)
         left_half = img[y:h, x:int((float(img.shape[1]) * .255)//1)]
-        right_half = img[y:h, int((float(img.shape[1]) * .83)//1):x+w]
+        right_half = img[y:h, int((float(img.shape[1]) * .80)//1):x+w]
 
-        #need to train with different font this is too inconsistent
         match_info = process_image(left_half)
-        rank_info = process_image(right_half)
-
         match_info = win_or_loss(match_info, ENEMY_template)
 
         time_and_map = match_info[0:int((float(match_info.shape[0]) * .20)//1),0:match_info.shape[1]]
         score_img = match_info[int((float(match_info.shape[0]) * .4)//1):match_info.shape[0],0:match_info.shape[1]]
 
         dirty_time = img_to_str(time_and_map)
-        dirty_score = img_to_str(score_img)
+        dirty_score = img_to_str(score_img, "--psm 7")
         print(dirty_time, dirty_score)
         duration, map_name = dirty_time[0].split("-")
-        score = ' '.join([str(elem) for elem in dirty_score])        
+        score = ' '.join([str(elem) for elem in dirty_score])
+        if not score:
+            score = "0-0"
         map_info = [duration, map_name, score]
+        print(map_info)
         
-        #should never need to clean up score as it can read three characters black text surrounded by white 
-        #score
-        """try:
-            score = dirty_text[1]
-            score = [x for x in score if x.isdigit() or x == "-"]
-            score = ''.join(score).strip()
-        except:
-            #fix this later
-            #print("shit cant find the score")
-            score = "0-0
-        map_name = [x for x in map_name if x.isalpha() or x == "'" or x.isspace()]
-        map_name = ''.join(map_name).strip()
-        #score processing
-        """
-        
-        dirty_rank = img_to_str(rank_info)
-        #this may not always work
-        #clean up dirty_rank to get rank name, lp total
-        
-        clean_rank = []
 
-        for entry in dirty_rank:
-            if any(rank in entry or '/' in entry for rank in ranks):
-                clean_rank.append(entry)
+        rank_info = process_image(right_half)
+
+        #gain_loss = rank_info[int((float(rank_info.shape[0]) * .54)//1):int((float(rank_info.shape[0]) * .61)//1), int((float(rank_info.shape[1]) * .77)//1):int((float(rank_info.shape[1]) * .9)//1)]
+        rank_name = rank_info[int((float(rank_info.shape[0]) * .673)//1):int((float(rank_info.shape[0]) * .8)//1), 0:rank_info.shape[1]]
+        lp = rank_info[int((float(rank_info.shape[0]) * .8)//1):int((float(rank_info.shape[0]) * .9)//1), 0:rank_info.shape[1]]
+        #cv.imshow('img', gain_loss)
+        #cv.waitKey(0)
+        
+        lst = img_to_str(rank_name) + img_to_str(lp)
+        clean_rank = []
+        for i in lst:
+            clean_rank.append(i)
+        
+        print(clean_rank)
 
         if not clean_rank:
             clean_rank = ["Normal", ""]
