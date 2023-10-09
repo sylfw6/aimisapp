@@ -43,7 +43,7 @@ def process_img(img):
     #greyscale for readability
     grey_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     (thresh,final_img) = cv.threshold(grey_img, 127, 255, cv.THRESH_BINARY)
-    final_img = cv.resize(final_img, None, fx=1.75, fy=1.75)
+    final_img = cv.resize(final_img, None, fx=4, fy=4)
     final_img = cv.medianBlur(final_img, 5)
     final_img = is_verified_present(final_img)
     #show what ocr is seeing
@@ -111,12 +111,12 @@ def get_info():
     #cv.imshow('a', crop_img)
     #k = cv.waitKey(0)
     dirty_names = [
-        process_img(crop_img[0:img.shape[0], 0:(int((float(img.shape[1]) * .17)//1))]),
-        process_img(crop_img[0:img.shape[0], (int((float(img.shape[1]) * .158)//1)):(int((float(img.shape[1]) * .33)//1))]),
-        process_img(crop_img[0:img.shape[0], (int((float(img.shape[1]) * .316)//1)):(int((float(img.shape[1]) * .525)//1))]),
-        process_img(crop_img[0:img.shape[0], (int((float(img.shape[1]) * .475)//1)):(int((float(img.shape[1]) * .684)//1))]),
-        process_img(crop_img[0:img.shape[0], (int((float(img.shape[1]) * .67)//1)):(int((float(img.shape[1]) * .842)//1))]),
-        process_img(crop_img[0:img.shape[0], (int((float(img.shape[1]) * .83)//1)):img.shape[1]])
+        process_img(crop_img[5:img.shape[0], 0:(int((float(img.shape[1]) * .17)//1))]),
+        process_img(crop_img[5:img.shape[0], (int((float(img.shape[1]) * .158)//1)):(int((float(img.shape[1]) * .33)//1))]),
+        process_img(crop_img[5:img.shape[0], (int((float(img.shape[1]) * .316)//1)):(int((float(img.shape[1]) * .525)//1))]),
+        process_img(crop_img[5:img.shape[0], (int((float(img.shape[1]) * .475)//1)):(int((float(img.shape[1]) * .684)//1))]),
+        process_img(crop_img[5:img.shape[0], (int((float(img.shape[1]) * .67)//1)):(int((float(img.shape[1]) * .842)//1))]),
+        process_img(crop_img[5:img.shape[0], (int((float(img.shape[1]) * .83)//1)):img.shape[1]])
     ]
 
     #use tesseract to read names
@@ -125,6 +125,9 @@ def get_info():
     for i in dirty_names:
         #lang = "noto" my trained data
         u = pytesseract.image_to_string(i, lang="Noto")
+        #probably X?
+        if u == "":
+            u = "X"
         names.append(u.strip("\n"))
     """   
     #filter out empty list entries
@@ -143,12 +146,20 @@ def get_info():
     print(names)
     return names
 
+#if its a set of characters not covered by my language need to direct it to somewhere else 
 
 #gets data of a specific player
 async def get_corestrike_data(session, name):
-    url = "https://corestrike.gg/lookup/" + name + "?region=Global&json=true"
-    async with session.get(url) as response:
-        return await response.json()
+    if name != "X":
+        url = "https://corestrike.gg/lookup/" + name + "?region=Global&json=true"
+        async with session.get(url) as response:
+            return await response.json()
+    #x giving it to me even in code
+    else:
+        url = "https://corestrike.gg/lookup/Juno?region=Global&json=true"
+        async with session.get(url) as response:
+            return await response.json()
+                    
     
 #calls corestrike for all players in the match asynchronously
 #fail condition if the profile doesnt exist
@@ -158,16 +169,19 @@ async def call_corestrike():
     async with aiohttp.ClientSession() as session:
         tasks = [get_corestrike_data(session, name) for name in names]
         result = await asyncio.gather(*tasks)
-
     #after we have all their data put it in our dict to be used by main
     for i in range(len(names)):
-        if result[i]["rankedStats"]["is_ranked"]:
-            user[names[i]] = result[i]["rankedStats"]
-        else:
-            #dummy data if not ranked
+        try:
+            if result[i]["rankedStats"]["is_ranked"]:
+                user[names[i]] = result[i]["rankedStats"]
+            else:
+                #dummy data if not ranked
+                print(names[i],"COULD NOT FIND PLAYER PROFILE - POSSIBLY NOT IN TOP 10k")
+                user[names[i]] = {'createdAt': '0', 'rating': 0, 'wins': 0, 'losses': 0, 'games': 0}
+        except:
+            #profile url is invalid
             print(names[i],"COULD NOT FIND PLAYER PROFILE - POSSIBLY NOT IN TOP 10k")
             user[names[i]] = {'createdAt': '0', 'rating': 0, 'wins': 0, 'losses': 0, 'games': 0}
-
     print("done processing")
     return user, names
 

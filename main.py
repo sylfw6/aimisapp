@@ -92,10 +92,6 @@ def round_down_to_nearest_100(num):
     else:
         return res
     
-def raise_above_all(window):
-    window.attributes('-topmost', 1)
-    window.attributes('-topmost', 0)
-
 #start button prompt
 #scanning/loading screen
 #info screen as a separate window
@@ -193,10 +189,11 @@ def load_screen():
 
 def scan_for_loading(window, text, gif):
     if is_target_image_present(template_path, .8):
-        #time.sleep(1)
         text.config(text="Players found - Ai.Mi is working")
+        window.wm_attributes("-topmost", True)
+        window.wm_attributes("-topmost", False)
         gif.load(gamercat)
-        #time.sleep(1)
+        window.update()
         match_found(window)
     else:
         print("Searching for loading screen")
