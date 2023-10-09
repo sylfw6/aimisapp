@@ -314,7 +314,7 @@ def info_screen(user, names, old_window):
     match_stats.update()
 
 if __name__=="__main__":
-    root = ttk.Window(title="aimis app", iconphoto=os.path.join(script_dir, "assets/orb.png"))
+    root = ttk.Window(title="aimis app", iconphoto=os.path.join(script_dir, "assets/aimiphone.png"))
     style = ttk.Style("vapor")
     root.geometry("1280x720")
 
