@@ -21,7 +21,7 @@ verified_path = os.path.join(script_dir, "assets/verified.png")
 def is_target_image_present(target, num):
     #change confidence .8 for load screen
     #.3 for endgame
-    if not pyautogui.locateOnScreen(target, confidence=num):
+    if pyautogui.locateOnScreen(target, confidence=num):
         return True
     return False
 
@@ -36,7 +36,7 @@ def is_verified_present(img):
     loc = np.where( res >= threshold)
     for pt in zip(*loc[::-1]):
         cv.rectangle(src, pt, (pt[0] + w, pt[1] + h), (0,0,0), -1)
-        
+
     return src
     
 def process_img(img):
@@ -54,13 +54,13 @@ def process_img(img):
 def take_ss(path):
     #print(gw.getAllTitles())
 
-    """window = gw.getWindowsWithTitle("OmegaStrikers  ")[0]
+    window = gw.getWindowsWithTitle("OmegaStrikers  ")[0]
     left, top = window.topleft
     right, bottom = window.bottomright
     pyautogui.screenshot(path)
     im = Image.open(path)
     im = im.crop((left,top,right,bottom))
-    im.save(path)"""
+    im.save(path)
 
     img = cv.imread(path)
 
