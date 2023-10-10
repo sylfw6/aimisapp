@@ -21,7 +21,7 @@ verified_path = os.path.join(script_dir, "assets/verified.png")
 def is_target_image_present(target, num):
     #change confidence .8 for load screen
     #.3 for endgame
-    if pyautogui.locateOnScreen(target, confidence=num):
+    if not pyautogui.locateOnScreen(target, confidence=num):
         return True
     return False
 
@@ -32,18 +32,18 @@ def is_verified_present(img):
     w, h = template.shape[::-1]
 
     res = cv.matchTemplate(src,template,cv.TM_CCOEFF_NORMED)
-    threshold = 0.8
+    threshold = 0.4
     loc = np.where( res >= threshold)
     for pt in zip(*loc[::-1]):
         cv.rectangle(src, pt, (pt[0] + w, pt[1] + h), (0,0,0), -1)
-
+        
     return src
     
 def process_img(img):
     #greyscale for readability
     grey_img = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     (thresh,final_img) = cv.threshold(grey_img, 127, 255, cv.THRESH_BINARY)
-    final_img = cv.resize(final_img, None, fx=2, fy=2)
+    final_img = cv.resize(final_img, None, fx=2.5, fy=2.5)
     final_img = cv.medianBlur(final_img, 5)
     final_img = is_verified_present(final_img)
     #show what ocr is seeing
@@ -54,13 +54,13 @@ def process_img(img):
 def take_ss(path):
     #print(gw.getAllTitles())
 
-    window = gw.getWindowsWithTitle("OmegaStrikers  ")[0]
+    """window = gw.getWindowsWithTitle("OmegaStrikers  ")[0]
     left, top = window.topleft
     right, bottom = window.bottomright
     pyautogui.screenshot(path)
     im = Image.open(path)
     im = im.crop((left,top,right,bottom))
-    im.save(path)
+    im.save(path)"""
 
     img = cv.imread(path)
 

@@ -157,14 +157,16 @@ def get_overview(flag=None):
         match_info = win_or_loss(match_info, ENEMY_template)
 
         time_and_map = match_info[0:int((float(match_info.shape[0]) * .20)//1),0:match_info.shape[1]]
-        score_img = match_info[int((float(match_info.shape[0]) * .4)//1):match_info.shape[0],0:match_info.shape[1]]
+        score_img = match_info[int((float(match_info.shape[0]) * .4)//1):match_info.shape[0],0:int((float(match_info.shape[1]) * .3)//1)]
+
 
         dirty_time = img_to_str(time_and_map)
         dirty_score = img_to_str(score_img, "--psm 7")
         print(dirty_time, dirty_score)
         duration, map_name = dirty_time[0].split("-")
         score = ' '.join([str(elem) for elem in dirty_score])
-        if not score:
+        if not score or not (score[0].isnumeric() and score[-1].isnumeric()):
+            print("Bad score")
             score = "0-0"
         map_info = [duration, map_name, score]
         print(map_info)
@@ -174,11 +176,18 @@ def get_overview(flag=None):
 
         #gain_loss = rank_info[int((float(rank_info.shape[0]) * .54)//1):int((float(rank_info.shape[0]) * .61)//1), int((float(rank_info.shape[1]) * .77)//1):int((float(rank_info.shape[1]) * .9)//1)]
         rank_name = rank_info[int((float(rank_info.shape[0]) * .673)//1):int((float(rank_info.shape[0]) * .8)//1), 0:rank_info.shape[1]]
-        lp = rank_info[int((float(rank_info.shape[0]) * .8)//1):int((float(rank_info.shape[0]) * .9)//1), 0:rank_info.shape[1]]
-        #cv.imshow('img', gain_loss)
-        #cv.waitKey(0)
-        
-        lst = img_to_str(rank_name) + img_to_str(lp)
+        lp = rank_info[int((float(rank_info.shape[0]) * .8)//1):int((float(rank_info.shape[0]) * .9)//1), int((float(rank_info.shape[1]) * .665)//1):rank_info.shape[1]]
+
+        rn = img_to_str(rank_name)
+        if not rn:
+            rn = ["Error"]
+        else:
+            for i in rn:
+                if not i.isalnum():
+                    rn = ["Error"]
+                    break
+
+        lst = rn + img_to_str(lp)
         clean_rank = []
         for i in lst:
             clean_rank.append(i)
